@@ -1,0 +1,50 @@
+name: Daily checks
+
+on:
+  schedule:
+    # 14:00 UTC every day (adjust below if you want a different time)
+    - cron: "0 14 * * *"
+  workflow_dispatch: {}  # lets you run it manually too
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # --- Meta test ---
+      - name: Meta test
+        env:
+          FB_ACCESS_TOKEN: ${{ secrets.FB_ACCESS_TOKEN || secrets.FB_TOKEN }}
+          FB_APP_ID:       ${{ secrets.FB_APP_ID }}
+          FB_APP_SECRET:   ${{ secrets.FB_APP_SECRET }}
+          NOTION_TOKEN:    ${{ secrets.NOTION_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          python scripts/test_meta.py
+
+      # --- Notion test ---
+      - name: Notion test
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        run: |
+          python scripts/test_notion.py
+
+      # --- Slack test (only if previous steps failed) ---
+      - name: Notify Slack on failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          python scripts/test_slack.py
