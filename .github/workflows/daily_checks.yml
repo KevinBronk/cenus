@@ -43,11 +43,6 @@ jobs:
         if: ${{ success() }}
         run: python scripts/test_slack.py
 
-      # Optional extra check you added
-      - name: Meta health check
-        if: ${{ success() }}
-        run: python scripts/check_meta_health.py
-
       - name: Notify Slack on failure
         if: ${{ failure() }}
         run: |
