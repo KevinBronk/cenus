@@ -20,7 +20,7 @@ jobs:
       FB_APP_SECRET: ${{ secrets.FB_APP_SECRET }}
       NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
+      AD_ACCOUNT_ID: ${{ secrets.AD_ACCOUNT_ID }}
 
     steps:
       - name: Check out repo
@@ -33,6 +33,9 @@ jobs:
 
       - name: Install deps
         run: pip install -r requirements.txt
+
+      - name: Meta health check
+      run: python scripts/check_meta_health.py
 
       - name: Meta test
         run: python scripts/test_meta.py
