@@ -18,7 +18,7 @@ jobs:
       FB_APP_ID:        ${{ secrets.FB_APP_ID }}
       FB_APP_SECRET:    ${{ secrets.FB_APP_SECRET }}
       NOTION_TOKEN:     ${{ secrets.NOTION_TOKEN }}
-      SLACK_WEBHOOK_URL:${{ secrets.SLACK_WEBHOOK_URL }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       AD_ACCOUNT_ID:    ${{ secrets.AD_ACCOUNT_ID }}     # only used if your health script needs it
 
     steps:
