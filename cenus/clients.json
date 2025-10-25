@@ -1,0 +1,8 @@
+[
+  {
+    "client_name": "CENUS Test Client",
+    "ad_account_id": "act_1103999877723524",
+    "notion_db_id": "292ab3b30479807eb3bbd2d2d14123cc",
+    "slack_webhook": "__FROM_SECRET__"
+  }
+]
