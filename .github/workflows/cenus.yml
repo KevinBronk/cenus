@@ -62,4 +62,4 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Daily pipeline (pull → push → alerts)
         run: |
-          python scripts/run_daily_pipeline.py
+          python cenus/scripts/run_daily_pipeline.py
