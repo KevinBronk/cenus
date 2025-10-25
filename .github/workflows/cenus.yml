@@ -4,16 +4,15 @@ on:
   schedule:
     # Every 15 minutes: run fatigue + alerts
     - cron: "*/15 * * * *"
-    # Daily at 06:05 UTC (~00:05 America/Chicago; DST may shift).
+    # Daily at 06:05 UTC (~00:05 America/Chicago)
     - cron: "5 6 * * *"
-  workflow_dispatch: {}  # allow manual run from Actions tab
+  workflow_dispatch: {}
 
 permissions:
   contents: read
 
 jobs:
   alerts_quarter_hour:
-    # run only on the 15-min schedule
     if: github.event_name == 'schedule' && github.event.schedule == '*/15 * * * *'
     runs-on: ubuntu-latest
     env:
@@ -22,29 +21,24 @@ jobs:
       FB_APP_SECRET: ${{ secrets.FB_APP_SECRET }}
       NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
       META_API_VERSION: ${{ secrets.META_API_VERSION }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
-
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-      - name: Run fatigue + alerts for all clients (14d window, 7d baseline)
+      - name: Run fatigue + alerts (14d window, 7d baseline)
         run: |
-          # If your script loops over clients when --client is omitted, keep as-is.
-          # Otherwise, call it per client from clients.json (you already do this in Step 3).
-          python scripts/run_fatigue_and_alerts.py --level ad --days 14 --baseline_days 7
+          python scripts/run_fatigue.py --level ad --days 14 --baseline_days 7
 
   daily_refresh:
-    # run on daily cron OR when manually dispatched
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.event.schedule == '5 6 * * *')
     runs-on: ubuntu-latest
     env:
@@ -53,21 +47,19 @@ jobs:
       FB_APP_SECRET: ${{ secrets.FB_APP_SECRET }}
       NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
       META_API_VERSION: ${{ secrets.META_API_VERSION }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
-
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
       - name: Daily pipeline (pull → push → alerts)
         run: |
           python scripts/run_daily_pipeline.py
