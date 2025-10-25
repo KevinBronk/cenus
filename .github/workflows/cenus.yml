@@ -4,10 +4,10 @@ on:
   workflow_dispatch:      # allow manual runs
   push:
     paths:
-      - .github/workflows/cenus.yml
-      - scripts/**
-      - src/**
-      - clients.json
+      - '.github/workflows/cenus.yml'
+      - 'scripts/**'
+      - 'src/**'
+      - 'clients.json'
   schedule:
     - cron: '*/15 * * * *'  # alerts
     - cron: '0 14 * * *'    # daily report
