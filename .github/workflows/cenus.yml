@@ -1,7 +1,7 @@
 name: Cenus Schedules
 
 on:
-  workflow_dispatch:        # allow manual runs
+    workflow_dispatch:        # allow manual runs
   push:
     paths:
       - '.github/workflows/cenus.yml'
