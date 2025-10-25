@@ -1,7 +1,7 @@
 name: Cenus Schedules
 
 on:
-  workflow_dispatch:        # allow manual runs
+  workflow_dispatch:     # allow manual runs
   push:
     paths:
       - '.github/workflows/cenus.yml'
@@ -9,48 +9,54 @@ on:
       - 'src/**'
       - 'clients.json'
   schedule:
-    - cron: '*/15 * * * *'  # alerts
-    - cron: '0 14 * * *'    # daily report
+    # Alerts every 15 minutes
+    - cron: '*/15 * * * *'
+    # Daily report 14:00 UTC
+    - cron: '0 14 * * *'
 
- jobs:
- alerts:
-   if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || (github.event_name == 'schedule' && github.event.schedule == '*/15 * * * *')
-   runs-on: ubuntu-latest
-   timeout-minutes: 15
-   steps:
-     - uses: actions/checkout@v4
-     - uses: actions/setup-python@v5
-       with:
-         python-version: "3.11"
-     - name: Install deps
-       run: |
-         python -m pip install --upgrade pip
-         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-     - name: Run alerts (15-min)
-       env:
-         FB_ACCESS_TOKEN: ${{ secrets.FB_ACCESS_TOKEN }}
-         NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-         NOTION_VERSION: ${{ secrets.NOTION_VERSION }}
-         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-       run: python scripts/cron_alerts.py
+jobs:
+  alerts:
+    # run on manual, push, or the */15 schedule
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || (github.event_name == 'schedule' && github.event.schedule == '*/15 * * * *')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Run alerts (15-min)
+        env:
+          FB_ACCESS_TOKEN: ${{ secrets.FB_ACCESS_TOKEN }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_VERSION: ${{ secrets.NOTION_VERSION }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          python scripts/cron_alerts.py
 
- daily_report:
-   if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || (github.event_name == 'schedule' && github.event.schedule == '0 14 * * *')
-   runs-on: ubuntu-latest
-   timeout-minutes: 20
-   steps:
-     - uses: actions/checkout@v4
-     - uses: actions/setup-python@v5
-       with:
-         python-version: "3.11"
-     - name: Install deps
-       run: |
-         python -m pip install --upgrade pip
-         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-     - name: Run daily report
-       env:
-         FB_ACCESS_TOKEN: ${{ secrets.FB_ACCESS_TOKEN }}
-         NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-         NOTION_VERSION: ${{ secrets.NOTION_VERSION }}
-         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-       run: python scripts/cron_daily_report.py
+  daily_report:
+    # run on manual or the 0 14 schedule
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.event.schedule == '0 14 * * *')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Run daily report
+        env:
+          FB_ACCESS_TOKEN: ${{ secrets.FB_ACCESS_TOKEN }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_VERSION: ${{ secrets.NOTION_VERSION }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          python scripts/cron_daily_report.py
