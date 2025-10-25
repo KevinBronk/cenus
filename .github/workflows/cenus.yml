@@ -35,7 +35,6 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Run fatigue + alerts (14d window, 7d baseline)
-        working-directory: cenus
         run: |
           python scripts/run_fatigue.py --level ad --days 14 --baseline_days 7
 
@@ -62,6 +61,5 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Daily pipeline (pull → push → alerts)
-        working-directory: cenus
         run: |
           python scripts/run_daily_pipeline.py
