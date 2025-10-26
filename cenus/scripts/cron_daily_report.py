@@ -1,3 +1,7 @@
+# cenus/scripts/cron_alerts.py  (and same for cron_daily_report.py)
+import sys, os
+
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 # scripts/cron_daily_report.py
 import os
 import sys
