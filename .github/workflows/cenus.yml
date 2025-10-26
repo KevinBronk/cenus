@@ -13,63 +13,61 @@ on:
     - cron: "*/15 * * * *"
     # Daily report 14:00 UTC
     - cron: "0 14 * * *"
+    
+    jobs:
+      alerts:
+        runs-on: ubuntu-latest
+        steps:
+          - uses: actions/checkout@v4
+          - uses: actions/setup-python@v5
+            with:
+              python-version: "3.11"
 
-jobs:
-  alerts:
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || (github.event_name == 'schedule' && github.event.schedule == '*/15 * * * *')
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+    - name: Install deps
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Run alerts (15-min)
+      run: |
+        set -e
+        python - <<'PY'
+    import traceback, runpy
+    print("=== STARTING alerts job ===")
+    try:
+    runpy.run_path("scripts/cron_alerts.py", run_name="__main__")
+    print("✅ SUCCESS: alerts ran without errors.")
+    except Exception as e:
+    print("❌ ERROR:", e)
+    traceback.print_exc()
+    raise
+    PY
+
+
+    daily_report:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - uses: actions/setup-python@v5
+          with:
+            python-version: "3.11"
+
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          - name: Run alerts (15-min)
-            run: |
-              set -e
-              python - <<'PY'
-          import traceback, runpy
-          print("=== STARTING alerts job ===")
-          try:
-          + runpy.run_path("scripts/cron_alerts.py", run_name="__main__")
-              print("✅ SUCCESS: alerts ran without errors.")
-          except Exception as e:
-              print("❌ ERROR:", e)
-              traceback.print_exc()
-              raise
-          PY
 
-
-
-  daily_report:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.event.schedule == '0 14 * * *')
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: Install deps
+      - name: Run daily report
         run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          - name: Run daily report
-            run: |
-              set -e
-              python - <<'PY'
-          import traceback, runpy
-          print("=== STARTING daily_report job ===")
-          try:
-          + runpy.run_path("scripts/cron_daily_report.py", run_name="__main__")
-              print("✅ SUCCESS: daily_report ran without errors.")
-          except Exception as e:
-              print("❌ ERROR:", e)
-              traceback.print_exc()
-              raise
-          PY
-
+          set -e
+          python - <<'PY'
+      import traceback, runpy
+      print("=== STARTING daily_report job ===")
+      try:
+      runpy.run_path("scripts/cron_daily_report.py", run_name="__main__")
+      print("✅ SUCCESS: daily_report ran without errors.")
+      except Exception as e:
+      print("❌ ERROR:", e)
+      traceback.print_exc()
+      raise
+      PY
