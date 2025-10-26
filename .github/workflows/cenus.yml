@@ -35,7 +35,8 @@ jobs:
           NOTION_VERSION: ${{ secrets.NOTION_VERSION }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          python scripts/cron_alerts.py
+          python cenus/scripts/cron_alerts.py
+
 
   daily_report:
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.event.schedule == '0 14 * * *')
@@ -57,4 +58,4 @@ jobs:
           NOTION_VERSION: ${{ secrets.NOTION_VERSION }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          python scripts/cron_daily_report.py
+          python cenus/scripts/cron_daily_report.py
