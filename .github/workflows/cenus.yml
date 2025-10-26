@@ -35,8 +35,10 @@ jobs:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_VERSION: ${{ secrets.NOTION_VERSION }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        run: |
-          python scripts/cron_alerts.py
+          - name: Run alerts (15-min)
+            run: |
+              python scripts/cron_alerts.py
+
 
   daily_report:
     # run on manual or the 0 14 schedule
@@ -58,5 +60,6 @@ jobs:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_VERSION: ${{ secrets.NOTION_VERSION }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        run: |
-          python scripts/cron_daily_report.py
+          - name: Run daily report
+            run: |
+              python scripts/cron_daily_report.py
