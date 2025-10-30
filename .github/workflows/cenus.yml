@@ -1,75 +1,50 @@
 name: Cenus Schedules
 
 on:
-  workflow_dispatch: {}  # allow manual runs
-
+  workflow_dispatch: {}   # allow manual runs
   push:
     paths:
       - .github/workflows/cenus.yml
       - scripts/**
       - src/**
       - clients.json
-
   schedule:
-  # Alerts every 15 minutes
-    - cron: "*/15 * * * *"
-  # Daily report 14:00 UTC
-    - cron: "0 14 * * *"
-    
-    jobs:
-      alerts:
-        runs-on: ubuntu-latest
-        steps:
-          - uses: actions/checkout@v4
-          - uses: actions/setup-python@v5
-            with:
-              python-version: "3.11"
+    - cron: "*/15 * * * *"   # alerts every 15 min
+    - cron: "5 6 * * *"      # daily 06:05 UTC (~00:05 Central)
 
-    - name: Install deps
-      run: |
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-    - name: Run alerts (15-min)
-      run: |
-        set -e
-        python - <<'PY'
-    import traceback, runpy
-    print("=== STARTING alerts job ===")
-    try:
-    runpy.run_path("scripts/cron_alerts.py", run_name="__main__")
-    print("✅ SUCCESS: alerts ran without errors.")
-    except Exception as e:
-    print("❌ ERROR:", e)
-    traceback.print_exc()
-    raise
-    PY
-
-
-    daily_report:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
-        - uses: actions/setup-python@v5
-          with:
-            python-version: "3.11"
-
+jobs:
+  alerts:
+    # run only on the 15-min cron
+    if: github.event_name == 'schedule' && github.event.schedule == '*/15 * * * *'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-      - name: Run daily report
+      - name: Run alerts (15-min)
         run: |
-          set -e
-          python - <<'PY'
-      import traceback, runpy
-      print("=== STARTING daily_report job ===")
-      try:
-      runpy.run_path("scripts/cron_daily_report.py", run_name="__main__")
-      print("✅ SUCCESS: daily_report ran without errors.")
-      except Exception as e:
-      print("❌ ERROR:", e)
-      traceback.print_exc()
-      raise
-      PY
+          python scripts/run_fatigue_and_alerts.py --level ad --days 14 --baseline_days 7
+
+  daily_refresh:
+    # run on the daily cron OR when manually dispatched
+    if: github.event_name != 'schedule' || github.event.schedule == '5 6 * * *'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Daily pipeline (pull → push → alerts)
+        run: |
+          python scripts/run_daily_pipeline.py
