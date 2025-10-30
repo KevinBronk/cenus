@@ -1,17 +1,19 @@
 name: Cenus Schedules
 
 on:
-  workflow_dispatch:  # allow manual runs
+  workflow_dispatch: {}  # allow manual runs
+
   push:
     paths:
       - .github/workflows/cenus.yml
       - scripts/**
       - src/**
       - clients.json
+
   schedule:
-    # Alerts every 15 minutes
+  # Alerts every 15 minutes
     - cron: "*/15 * * * *"
-    # Daily report 14:00 UTC
+  # Daily report 14:00 UTC
     - cron: "0 14 * * *"
     
     jobs:
