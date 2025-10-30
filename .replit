@@ -2,10 +2,14 @@ run = "python3 main.py"
 modules = ["python-3.11"]
 [nix]
 channel = "stable-25_05"
-packages = ["mailutils"]
+packages = ["mailutils", "imagemagick_light", "haskellPackages.mpi-hs-binary", "pass-nodmenu"]
 
 [deployment]
 run = ["sh", "-c", "python3 main.py"]
 
 [agent]
 expertMode = true
+
+[[ports]]
+localPort = 1024
+externalPort = 80
