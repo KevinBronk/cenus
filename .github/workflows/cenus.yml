@@ -23,32 +23,34 @@ env:
   META_API_VERSION: ${{ secrets.META_API_VERSION }}
 
 jobs:
-  alerts:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.11", cache: "pip" }
-      - name: Install deps
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      - name: Run alerts (15-min)
-        run: |
-          python scripts/run_fatigue.py --level ad --days 14 --baseline_days 7 || true
+alerts:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+        cache: "pip"
+    - name: Install deps
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Run alerts (15-min)
+      run: |
+        python scripts/run_fatigue.py --level ad --days 14 --baseline_days 7 || true
 
-  daily_refresh:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.11", cache: "pip" }
-      - name: Install deps
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      - name: Daily pipeline (pull → push → alerts)
-        run: |
-          pytho- name: Run alerts (15-min)
-            run: |
-              python scripts/run_fatigue.py --level ad --days 14 --baseline_days 7 || true
+daily_refresh:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+        cache: "pip"
+    - name: Install deps
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Daily pipeline (pull → push → alerts)
+      run: |
+        python scripts/run_daily_pipeline.py || true
