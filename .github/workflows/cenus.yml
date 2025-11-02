@@ -1,7 +1,7 @@
 name: Cenus AI Scheduler
 
 on:
-  workflow_dispatch: {}          # allow manual runs
+  workflow_dispatch: {}  # allow manual runs
   push:
     paths:
       - .github/workflows/cenus.yml
@@ -9,8 +9,8 @@ on:
       - src/**
       - clients.json
   schedule:
-    - cron: "*/15 * * * *"       # alerts every 15 minutes
-    - cron: "5 6 * * *"          # daily at 06:05 UTC (~00:05 CT)
+    - cron: "*/15 * * * *"  # alerts every 15 minutes
+    - cron: "5 6 * * *"     # daily at 06:05 UTC (~00:05 CT)
 
 permissions:
   contents: read
@@ -23,34 +23,38 @@ env:
   META_API_VERSION: ${{ secrets.META_API_VERSION }}
 
 jobs:
-alerts:
-  runs-on: ubuntu-latest
-  steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-        cache: "pip"
-    - name: Install deps
-      run: |
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Run alerts (15-min)
-      run: |
-        python scripts/run_fatigue.py --level ad --days 14 --baseline_days 7 || true
+  alerts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
 
-daily_refresh:
-  runs-on: ubuntu-latest
-  steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-        cache: "pip"
-    - name: Install deps
-      run: |
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Daily pipeline (pull → push → alerts)
-      run: |
-        python scripts/run_daily_pipeline.py || true
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run alerts (15-min)
+        run: |
+          python scripts/run_fatigue.py --level ad --days 14 --baseline_days 7 || true
+
+  daily_refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Daily pipeline (pull → push → alerts)
+        run: |
+          python scripts/run_daily_pipeline.py || true
