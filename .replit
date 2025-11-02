@@ -2,7 +2,7 @@ run = "python3 main.py"
 modules = ["python-3.11"]
 [nix]
 channel = "stable-25_05"
-packages = ["mailutils", "imagemagick_light", "haskellPackages.mpi-hs-binary", "pass-nodmenu"]
+packages = ["haskellPackages.mpi-hs-binary", "imagemagick_light", "mailutils", "pass-nodmenu"]
 
 [deployment]
 run = ["sh", "-c", "python3 main.py"]

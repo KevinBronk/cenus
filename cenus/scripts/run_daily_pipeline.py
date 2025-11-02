@@ -1,4 +1,3 @@
-# scripts/run_daily_pipeline.py
 import os, json, datetime, subprocess, sys
 
 CLIENTS_FILE = "clients.json"
